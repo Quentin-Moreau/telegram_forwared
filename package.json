@@ -1,0 +1,25 @@
+{
+  "name": "telegram_forwared",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Quentin-Moreau/telegram_forwared.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Quentin-Moreau/telegram_forwared/issues"
+  },
+  "homepage": "https://github.com/Quentin-Moreau/telegram_forwared#readme",
+  "dependencies": {
+    "@mtproto/core": "5.3.0",
+    "dotenv": "^8.2.0",
+    "node-telegram-bot-api": "^0.51.0",
+    "prompts": "^2.4.0"
+  }
+}
