@@ -34,4 +34,15 @@ You might need to alter it as Telegram wont allow you to send a login code, if n
 
 ## Heroku
 
+/!\ You will need the Heroku CLI /!\
+
+Click on this button to deploy to heroku.
+
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+Once the app is created and deployed, open the heroku CLI and run the following commands
+
+```bash
+heroku ps:scale web=0 worker=1 -a <app-name>
+heroku ps:restart -a <app-name>
+```
