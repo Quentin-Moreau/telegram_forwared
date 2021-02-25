@@ -1,0 +1,30 @@
+{
+    "name": "Telegram Forwared Bot",
+    "description": "Telegram bot to forware messages automatically",
+    "keywords": [
+      "telegram",
+      "bot",
+      "forwared"
+    ],
+    "repository": "https://github.com/Quentin-Moreau/telegram_forwared",
+    "env": {
+      "API_ID": {
+        "description": "Your API_ID (fetched from https://my.telegram.org/auth).",
+      },
+      "API_HASH": {
+        "description": "Your API_HASH (fetched from https://my.telegram.org/auth)",
+      },
+      "BOT_TOKEN": {
+        "description": "Your BOT_TOKEN (fetched from @BotFather)",
+      },
+      "FROM_CHANNEL_ID": {
+        "description": "The channel id you when to forward the messages from (Only id, no -100 before)."
+      },
+      "TO_CHANNEL_ID": {
+        "description": "The channel id you whan to forward the messages to (Only id, no -100 before)."
+      },
+      "PHONE_NUMBER": {
+        "description": "The phone number of the account you want to login with."
+      }
+    }
+  } 

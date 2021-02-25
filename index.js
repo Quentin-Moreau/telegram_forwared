@@ -1,5 +1,4 @@
 const env = require('dotenv').config();
-//console.log(env);
 const TelegramBot = require('node-telegram-bot-api');
 const { MTProto, getSRPParams } = require('@mtproto/core');
 
@@ -56,7 +55,7 @@ function startListener() {
             // printing new channel messages
             console.log(message)
 
-            bot.sendMessage(process.env.TO_CHANNEL_ID, message.message);
+            bot.sendMessage('-100' + process.env.TO_CHANNEL_ID, message.message);
         }
     });
 }
