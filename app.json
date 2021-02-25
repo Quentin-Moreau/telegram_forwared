@@ -9,13 +9,13 @@
     "repository": "https://github.com/Quentin-Moreau/telegram_forwared",
     "env": {
       "API_ID": {
-        "description": "Your API_ID (fetched from https://my.telegram.org/auth).",
+        "description": "Your API_ID (fetched from https://my.telegram.org/auth)."
       },
       "API_HASH": {
-        "description": "Your API_HASH (fetched from https://my.telegram.org/auth)",
+        "description": "Your API_HASH (fetched from https://my.telegram.org/auth)"
       },
       "BOT_TOKEN": {
-        "description": "Your BOT_TOKEN (fetched from @BotFather)",
+        "description": "Your BOT_TOKEN (fetched from @BotFather)"
       },
       "FROM_CHANNEL_ID": {
         "description": "The channel id you when to forward the messages from (Only id, no -100 before)."
