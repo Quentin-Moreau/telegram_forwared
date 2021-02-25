@@ -3,23 +3,39 @@ const TelegramBot = require('node-telegram-bot-api');
 const { MTProto, getSRPParams } = require('@mtproto/core');
 const prompts = require('prompts');
 
-const bot = new TelegramBot(config.BOT_TOKEN);
+const bot = new TelegramBot(config.BOT_TOKEN, { polling: true });
 
 async function getPhone() {
-    return (await prompts({
+    return config.PHONE_NUMBER;
+    /*return (await prompts({
         type: 'text',
         name: 'phone',
         message: 'Enter your phone number:'
-    })).phone
+    })).phone*/
 }
 
 async function getCode() {
+    return new Promise((resolve, reject) => {
+        bot.onText(/\/code (.+)/, (msg, match) => {
+            // 'msg' is the received Message from Telegram
+            // 'match' is the result of executing the regexp above on the text content
+            // of the message
+          
+            const chatId = msg.chat.id;
+            const resp = match[1]; // the captured "whatever"
+
+            console.log('code', resp);
+          
+            bot.removeTextListener(/\/code (.+)/);
+            resolve(resp.replace('A', ''));
+        });
+    })
     // you can implement your code fetching strategy here
-    return (await prompts({
+    /*return (await prompts({
         type: 'text',
         name: 'code',
         message: 'Enter the code sent:',
-    })).code
+    })).code*/
 }
 
 async function getPassword() {
@@ -50,6 +66,9 @@ function startListener() {
         }
     });
 }
+
+console.log('listening');
+
 
 mtproto.call('users.getFullUser', {
     id: {
@@ -83,8 +102,14 @@ mtproto.call('users.getFullUser', {
     })
     .then(async result => {
         console.log(error);
+        const interval = setInterval(() => {
+
+        }, 600000);
+        const code = await getCode();
+        clearInterval(interval);
+        
         return mtproto.call('auth.signIn', {
-            phone_code: await getCode(),
+            phone_code: code,
             phone_number: phone_number,
             phone_code_hash: result.phone_code_hash,
         });
@@ -114,6 +139,8 @@ mtproto.call('users.getFullUser', {
                     },
                 });
             });
+        } else if (error.error_message === 'PHONE_CODE_EXPIRED') {
+            process.exit(1);
         }
     })
     .then(result => {
@@ -121,4 +148,4 @@ mtproto.call('users.getFullUser', {
         // start listener since the user has logged in now
         startListener()
     });
-})
+});
