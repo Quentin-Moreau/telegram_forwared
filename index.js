@@ -5,45 +5,39 @@ const prompts = require('prompts');
 
 const bot = new TelegramBot(config.BOT_TOKEN, { polling: true });
 
-async function getPhone() {
-    return config.PHONE_NUMBER;
-    /*return (await prompts({
-        type: 'text',
-        name: 'phone',
-        message: 'Enter your phone number:'
-    })).phone*/
-}
-
 async function getCode() {
     return new Promise((resolve, reject) => {
         bot.onText(/\/code (.+)/, (msg, match) => {
-            // 'msg' is the received Message from Telegram
-            // 'match' is the result of executing the regexp above on the text content
-            // of the message
-          
-            const chatId = msg.chat.id;
             const resp = match[1]; // the captured "whatever"
 
-            console.log('code', resp);
+            console.log('[+] code received !');
           
             bot.removeTextListener(/\/code (.+)/);
             resolve(resp.replace('A', ''));
         });
-    })
-    // you can implement your code fetching strategy here
-    /*return (await prompts({
-        type: 'text',
-        name: 'code',
-        message: 'Enter the code sent:',
-    })).code*/
+    });
 }
 
 async function getPassword() {
-    return (await prompts({
-        type: 'text',
-        name: 'password',
-        message: 'Enter Password:',
-    })).password
+    return new Promise((resolve, reject) => {
+        bot.onText(/\/password (.+)/, (msg, match) => {
+            const resp = match[1]; // the captured "whatever"
+
+            console.log('[+] password received !');
+          
+            bot.removeTextListener(/\/password (.+)/);
+            resolve(resp.replace('A', ''));
+        });
+    });
+}
+
+function sendCode(phone) {
+    return mtproto.call('auth.sendCode', {
+        phone_number: phone,
+        settings: {
+        _: 'codeSettings',
+        },
+    });
 }
 
 const mtproto = new MTProto({
@@ -52,7 +46,7 @@ const mtproto = new MTProto({
 });
 
 function startListener() {
-    console.log('[+] starting listener')
+    console.log('[+] Starting listener')
     mtproto.updates.on('updates', ({ updates }) => {
         const newChannelMessages = updates
         .filter((update) => update._ === 'updateNewChannelMessage' && update.message.peer_id.channel_id === config.FROM_CHANNEL_ID)
@@ -67,9 +61,6 @@ function startListener() {
     });
 }
 
-console.log('listening');
-
-
 mtproto.call('users.getFullUser', {
     id: {
         _: 'inputUserSelf',
@@ -79,12 +70,10 @@ mtproto.call('users.getFullUser', {
 .catch(async error => {
 
     // The user is not logged in
-    console.log('[+] You must log in')
-    const phone_number = await getPhone()
-    console.log(phone_number);
+    console.log('[+] Login is required ... Sending access code');
 
     mtproto.call('auth.sendCode', {
-        phone_number: phone_number,
+        phone_number: config.PHONE_NUMBER,
         settings: {
             _: 'codeSettings',
         },
@@ -96,21 +85,21 @@ mtproto.call('users.getFullUser', {
 
             mtproto.setDefaultDc(+nextDcId);
 
-            return sendCode(phone_number);
+            return sendCode(config.PHONE_NUMBER);
         }
+        console.log('[+] Couldn\'t login, aborting ...');
         process.exit(1);
     })
     .then(async result => {
         console.log(error);
-        const interval = setInterval(() => {
-
-        }, 600000);
+        console.log('[+] Waiting for code ... (Send to your bot using /code [code])');
+        const interval = setInterval(() => {}, 600000);
         const code = await getCode();
         clearInterval(interval);
         
         return mtproto.call('auth.signIn', {
             phone_code: code,
-            phone_number: phone_number,
+            phone_number: config.PHONE_NUMBER,
             phone_code_hash: result.phone_code_hash,
         });
     })
@@ -120,14 +109,18 @@ mtproto.call('users.getFullUser', {
             return mtproto.call('account.getPassword').then(async result => {
                 const { srp_id, current_algo, srp_B } = result;
                 const { salt1, salt2, g, p } = current_algo;
-
+                console.log('[+] Waiting for password ... (Send to your bot using /password [password])');
+                const interval = setInterval(() => {}, 600000);
+                const password = await getPassword();
+                clearInterval(interval);
+                
                 const { A, M1 } = await getSRPParams({
                     g,
                     p,
                     salt1,
                     salt2,
                     gB: srp_B,
-                    password: await getPassword(),
+                    password,
                 });
 
                 return mtproto.call('auth.checkPassword', {
@@ -144,7 +137,7 @@ mtproto.call('users.getFullUser', {
         }
     })
     .then(result => {
-        console.log('[+] successfully authenticated');
+        console.log('[+] Successfully authenticated');
         // start listener since the user has logged in now
         startListener()
     });
