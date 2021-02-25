@@ -1,9 +1,7 @@
 const env = require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const { MTProto, getSRPParams } = require('@mtproto/core');
-const express = require('express');
 
-const app = express();
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
 async function getCode() {
@@ -143,8 +141,3 @@ mtproto.call('users.getFullUser', {
         startListener()
     });
 });
-
-app.get('/', function (req, res) {
-    res.send('money much');
-})
-app.listen(process.env.PORT, () => console.log(`Server is listening on port ${process.env.PORT}...`));
