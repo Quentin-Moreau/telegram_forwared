@@ -1,9 +1,9 @@
-const config = require('./config');
+const env = require('dotenv').config();
+//console.log(env);
 const TelegramBot = require('node-telegram-bot-api');
 const { MTProto, getSRPParams } = require('@mtproto/core');
-const prompts = require('prompts');
 
-const bot = new TelegramBot(config.BOT_TOKEN, { polling: true });
+const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
 async function getCode() {
     return new Promise((resolve, reject) => {
@@ -41,22 +41,22 @@ function sendCode(phone) {
 }
 
 const mtproto = new MTProto({
-    api_id: config.API_ID,
-    api_hash: config.API_HASH,
+    api_id: process.env.API_ID,
+    api_hash: process.env.API_HASH,
 });
 
 function startListener() {
     console.log('[+] Starting listener')
     mtproto.updates.on('updates', ({ updates }) => {
         const newChannelMessages = updates
-        .filter((update) => update._ === 'updateNewChannelMessage' && update.message.peer_id.channel_id === config.FROM_CHANNEL_ID)
+        .filter((update) => update._ === 'updateNewChannelMessage' && update.message.peer_id.channel_id === parseInt(process.env.FROM_CHANNEL_ID))
         .map(({ message }) => message);
 
         for (const message of newChannelMessages) {
             // printing new channel messages
             console.log(message)
 
-            bot.sendMessage(config.TO_CHANNEL_ID, message.message);
+            bot.sendMessage(process.env.TO_CHANNEL_ID, message.message);
         }
     });
 }
@@ -73,7 +73,7 @@ mtproto.call('users.getFullUser', {
     console.log('[+] Login is required ... Sending access code');
 
     mtproto.call('auth.sendCode', {
-        phone_number: config.PHONE_NUMBER,
+        phone_number: process.env.PHONE_NUMBER,
         settings: {
             _: 'codeSettings',
         },
@@ -85,13 +85,13 @@ mtproto.call('users.getFullUser', {
 
             mtproto.setDefaultDc(+nextDcId);
 
-            return sendCode(config.PHONE_NUMBER);
+            return sendCode(process.env.PHONE_NUMBER);
         }
         console.log('[+] Couldn\'t login, aborting ...');
         process.exit(1);
     })
     .then(async result => {
-        console.log(error);
+        console.log(result);
         console.log('[+] Waiting for code ... (Send to your bot using /code [code])');
         const interval = setInterval(() => {}, 600000);
         const code = await getCode();
@@ -99,7 +99,7 @@ mtproto.call('users.getFullUser', {
         
         return mtproto.call('auth.signIn', {
             phone_code: code,
-            phone_number: config.PHONE_NUMBER,
+            phone_number: process.env.PHONE_NUMBER,
             phone_code_hash: result.phone_code_hash,
         });
     })
