@@ -1,6 +1,7 @@
 const env = require('dotenv').config();
 const TelegramBot = require('node-telegram-bot-api');
 const { MTProto, getSRPParams } = require('@mtproto/core');
+const { storage }= require('./Storage');
 
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
 
@@ -42,6 +43,7 @@ function sendCode(phone) {
 const mtproto = new MTProto({
     api_id: process.env.API_ID,
     api_hash: process.env.API_HASH,
+    customLocalStorage: storage
 });
 
 function startListener() {
