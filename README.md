@@ -23,6 +23,8 @@ BOT_TOKEN='<Your bot token fetched from @BotFather as string>'
 PHONE_NUMBER='<Your phone number in international format as string>'
 ```
 
+You may need to tweak the code to remove references to the DATABASE_URL env for local setup cause I was too lazy to do it myself.
+
 ## Usage
 
 Once ran, send a message to your bot containing the login code you juste received using the following command
