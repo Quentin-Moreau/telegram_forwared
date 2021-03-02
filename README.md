@@ -39,14 +39,3 @@ You might need to alter it as Telegram wont allow you to send a login code, if n
 Click on this button to deploy to heroku.
 
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-Once the app is created and deployed, you will need to add the free Heroku Postgres add-on to your app.
-
-Then open the heroku CLI and run the following commands
-
-```bash
-heroku ps:scale web=0 worker=1 -a <app-name>
-heroku ps:restart -a <app-name>
-```
-
-you can also do it under the 'resources' tab on Heroku, disable the web dyno, enable the worker dyno and you're all set !

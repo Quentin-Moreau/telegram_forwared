@@ -7,6 +7,14 @@
       "forwared"
     ],
     "repository": "https://github.com/Quentin-Moreau/telegram_forwared",
+    "formation": {
+      "worker": {
+        "quantity": 1
+      },
+      "web": {
+        "quantity": 0
+      }
+    },
     "env": {
       "API_ID": {
         "description": "Your API_ID (fetched from https://my.telegram.org/auth)."
@@ -26,5 +34,13 @@
       "PHONE_NUMBER": {
         "description": "The phone number of the account you want to login with."
       }
-    }
+    },
+    "addons": [
+      {
+        "plan": "heroku-postgresql",
+        "options": {
+          "version": "12"
+        }
+      }
+    ]
   } 
