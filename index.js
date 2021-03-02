@@ -81,7 +81,7 @@ mtproto.call('users.getFullUser', {
     })
     .catch(error => {
         console.log(error);
-        if (error.error_message.includes('_MIGRATE_')) {
+        if (error.error_message && error.error_message.includes('_MIGRATE_')) {
             const [type, nextDcId] = error.error_message.split('_MIGRATE_');
 
             mtproto.setDefaultDc(+nextDcId);

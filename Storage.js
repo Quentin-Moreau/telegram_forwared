@@ -15,7 +15,7 @@ class Storage {
         const client = await this.pool.connect();
         return client.query(`SELECT * FROM config_store`)
         .catch(err => {
-            console.log(err)
+            console.log('Creating the config_store database');
             return client.query(`CREATE TABLE config_store (
                 key varchar,
                 value varchar
