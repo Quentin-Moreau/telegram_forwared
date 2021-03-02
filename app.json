@@ -9,10 +9,8 @@
     "repository": "https://github.com/Quentin-Moreau/telegram_forwared",
     "formation": {
       "worker": {
-        "quantity": 1
-      },
-      "web": {
-        "quantity": 0
+        "quantity": 1,
+        "size": "standard-1x"
       }
     },
     "env": {
