@@ -1,9 +1,12 @@
 const env = require('dotenv').config();
+process.env.NTBA_FIX_319 = 1;
 const TelegramBot = require('node-telegram-bot-api');
 const { MTProto, getSRPParams } = require('@mtproto/core');
-const { storage }= require('./Storage');
+const { storage } = require('./Storage');
 
+console.log('[+] Starting telegram Bot ...');
 const bot = new TelegramBot(process.env.BOT_TOKEN, { polling: true });
+console.log('[+] Telegram Bot started');
 
 async function getCode() {
     return new Promise((resolve, reject) => {
@@ -40,11 +43,16 @@ function sendCode(phone) {
     });
 }
 
-const mtproto = new MTProto({
+let proto_conf = {
     api_id: process.env.API_ID,
-    api_hash: process.env.API_HASH,
-    customLocalStorage: storage
-});
+    api_hash: process.env.API_HASH
+};
+
+if (process.env.DATABASE_URL) {
+    proto_conf.customLocalStorage = storage
+}
+
+const mtproto = new MTProto(proto_conf);
 
 function startListener() {
     console.log('[+] Starting listener')
@@ -55,32 +63,33 @@ function startListener() {
 
         for (const message of newChannelMessages) {
             // printing new channel messages
-            console.log(message)
+            console.log('[-] Forwarding message :')
+            console.log(message.message);
 
             bot.sendMessage('-100' + process.env.TO_CHANNEL_ID, message.message);
         }
     });
 }
 
+console.log('[+] Initializing Telegram client ...');
 mtproto.call('users.getFullUser', {
     id: {
         _: 'inputUserSelf',
     },
 })
-.then(startListener)
 .catch(async error => {
 
     // The user is not logged in
     console.log('[+] Login is required ... Sending access code');
 
-    mtproto.call('auth.sendCode', {
+    return mtproto.call('auth.sendCode', {
         phone_number: process.env.PHONE_NUMBER,
         settings: {
             _: 'codeSettings',
         },
     })
     .catch(error => {
-        console.log(error);
+        console.log('[+] Error ... Sending code again');
         if (error.error_message && error.error_message.includes('_MIGRATE_')) {
             const [type, nextDcId] = error.error_message.split('_MIGRATE_');
 
@@ -92,7 +101,6 @@ mtproto.call('users.getFullUser', {
         process.exit(1);
     })
     .then(async result => {
-        console.log(result);
         console.log('[+] Waiting for code ... (Send to your bot using /code [code])');
         const interval = setInterval(() => {}, 600000);
         const code = await getCode();
@@ -105,7 +113,7 @@ mtproto.call('users.getFullUser', {
         });
     })
     .catch(error => {
-        console.log(error);
+        console.log('[+] Password required ...');
         if (error.error_message === 'SESSION_PASSWORD_NEEDED') {
             return mtproto.call('account.getPassword').then(async result => {
                 const { srp_id, current_algo, srp_B } = result;
@@ -137,9 +145,13 @@ mtproto.call('users.getFullUser', {
             process.exit(1);
         }
     })
-    .then(result => {
-        console.log('[+] Successfully authenticated');
-        // start listener since the user has logged in now
-        startListener()
-    });
+})
+.then(_ => {
+    console.log('[+] Telegram client initialized');
+    startListener();
+})
+.catch(error => {
+    console.log('[+] An error occured');
+    console.log(error);
+    process.exit(1);
 });
